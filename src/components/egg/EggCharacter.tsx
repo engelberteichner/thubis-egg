@@ -21,6 +21,7 @@ interface Props {
   cooking?: boolean;
   done?: boolean;
   pxSize?: number;
+  ribbon?: boolean;
 }
 
 export function EggCharacter({
