@@ -159,8 +159,9 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
-  function startTimer(d = doneness, s = size) {
-    const total = calcCookSeconds(d, s, loc.pressureHpa);
+  function startTimer(d = doneness, s = size, fixedSeconds?: number) {
+    primeAudio();
+    const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
       { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false },
@@ -212,6 +213,12 @@ function EggApp() {
 
   function deletePreset(id: string) {
     setPresets((p) => p.filter((x) => x.id !== id));
+  }
+
+  function renamePreset(id: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setPresets((p) => p.map((x) => (x.id === id ? { ...x, name: trimmed } : x)));
   }
 
   // ---------- location ----------
