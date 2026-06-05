@@ -488,6 +488,7 @@ function TimerCard({
           cooking={!timer.done && timer.pausedRemaining == null}
           done={timer.done}
           pxSize={68}
+          ribbon={timer.presetId === THUBIS_ID}
         />
       </div>
 
