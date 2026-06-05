@@ -3,13 +3,17 @@ import type { Size } from "@/lib/egg-timer";
 
 type Variant = "soft" | "medium" | "hard";
 
-const PALETTE: Record<Variant, { shell: string; shade: string; cheek: string }> = {
-  soft:   { shell: "#fbf6e4", shade: "#efe4be", cheek: "#f6c6b0" },
-  medium: { shell: "#f5e6b8", shade: "#e6cf86", cheek: "#f0a584" },
-  hard:   { shell: "#e9cf8a", shade: "#cda85a", cheek: "#d97a55" },
+// Belly color changes from warm orange (soft yolk) → pale yellow (hard yolk).
+// The shell itself stays eggshell white for all variants.
+const BELLY: Record<Variant, { fill: string; ring: string }> = {
+  soft:   { fill: "#ffa94d", ring: "#e8862b" }, // orange
+  medium: { fill: "#ffd24a", ring: "#e0a91f" }, // yolk yellow
+  hard:   { fill: "#fff1a8", ring: "#e8c95a" }, // pale yellow
 };
 
-const SIZE_SCALE: Record<Size, number> = { S: 0.85, M: 1, L: 1.1, XL: 1.2 };
+const SHELL = { light: "#ffffff", base: "#fbf6e7", shade: "#ecdfba", cheek: "#f6b89a" };
+
+const SIZE_SCALE: Record<Size, number> = { S: 0.7, M: 0.9, L: 1.1, XL: 1.3 };
 
 interface Props {
   variant: Variant;
@@ -26,18 +30,12 @@ export function EggCharacter({
   done = false,
   pxSize = 180,
 }: Props) {
-  const p = PALETTE[variant];
+  const belly = BELLY[variant];
   const scale = SIZE_SCALE[size];
 
-  // animation per variant
-  const idle =
-    variant === "soft"
-      ? { scaleX: [1, 1.05, 0.97, 1], scaleY: [1, 0.95, 1.03, 1] }
-      : variant === "medium"
-        ? { y: [0, -4, 0, -2, 0], rotate: [-1.5, 1.5, -1, 1, -1.5] }
-        : { y: [0, -8, 0], rotate: [0, -2, 2, 0] };
-
-  const duration = variant === "soft" ? 1.8 : variant === "medium" ? 2.6 : 1.2;
+  // Gentle, consistent happy bobbing for every variant.
+  const idle = { y: [0, -5, 0, -2, 0], rotate: [-1.2, 1.2, -0.8, 0.8, -1.2] };
+  const duration = 2.4;
 
   return (
     <motion.div
@@ -49,24 +47,30 @@ export function EggCharacter({
         viewBox="0 0 200 240"
         width="100%"
         height="100%"
-        style={{ transform: `scale(${scale})`, transformOrigin: "center bottom", overflow: "visible" }}
+        style={{ overflow: "visible" }}
+        animate={{ scale }}
+        transition={{ type: "spring", stiffness: 220, damping: 18 }}
       >
         <defs>
-          <radialGradient id={`g-${variant}`} cx="35%" cy="30%" r="75%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-            <stop offset="55%" stopColor={p.shell} />
-            <stop offset="100%" stopColor={p.shade} />
+          <radialGradient id="g-shell" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stopColor={SHELL.light} stopOpacity="0.95" />
+            <stop offset="55%" stopColor={SHELL.base} />
+            <stop offset="100%" stopColor={SHELL.shade} />
           </radialGradient>
+          <radialGradient id={`g-belly-${variant}`} cx="50%" cy="40%" r="65%">
+            <stop offset="0%" stopColor="#fff" stopOpacity="0.55" />
+            <stop offset="60%" stopColor={belly.fill} />
+            <stop offset="100%" stopColor={belly.ring} />
+          </radialGradient>
+          <clipPath id="clip-egg">
+            <path d="M100 30 C 55 30 30 110 30 160 C 30 205 60 225 100 225 C 140 225 170 205 170 160 C 170 110 145 30 100 30 Z" />
+          </clipPath>
         </defs>
 
         {/* Shadow */}
         <motion.ellipse
-          cx="100"
-          cy="225"
-          rx="55"
-          ry="6"
-          fill="#000"
-          opacity="0.12"
+          cx="100" cy="225" rx="55" ry="6"
+          fill="#000" opacity="0.12"
           animate={{ rx: [55, 48, 55] }}
           transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -90,44 +94,57 @@ export function EggCharacter({
           </g>
         )}
 
-        {/* Egg body */}
+        {/* Eggshell body */}
         <path
           d="M100 30 C 55 30 30 110 30 160 C 30 205 60 225 100 225 C 140 225 170 205 170 160 C 170 110 145 30 100 30 Z"
-          fill={`url(#g-${variant})`}
-          stroke={p.shade}
+          fill="url(#g-shell)"
+          stroke={SHELL.shade}
           strokeWidth="2"
         />
 
+        {/* Yolk belly — color animates with variant */}
+        <g clipPath="url(#clip-egg)">
+          <motion.ellipse
+            cx="100" cy="170" rx="62" ry="48"
+            fill={`url(#g-belly-${variant})`}
+            stroke={belly.ring}
+            strokeWidth="2"
+            initial={false}
+            animate={{ fill: belly.fill }}
+            transition={{ duration: 0.4 }}
+          />
+        </g>
+
         {/* Cheeks */}
-        <ellipse cx="65" cy="155" rx="11" ry="6" fill={p.cheek} opacity="0.7" />
-        <ellipse cx="135" cy="155" rx="11" ry="6" fill={p.cheek} opacity="0.7" />
+        <ellipse cx="62" cy="148" rx="11" ry="6" fill={SHELL.cheek} opacity="0.75" />
+        <ellipse cx="138" cy="148" rx="11" ry="6" fill={SHELL.cheek} opacity="0.75" />
 
         {/* Eyes */}
         {done ? (
           <>
-            <path d="M 70 138 q 8 -10 16 0" stroke="#3b2a1a" strokeWidth="4" strokeLinecap="round" fill="none" />
-            <path d="M 114 138 q 8 -10 16 0" stroke="#3b2a1a" strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d="M 70 132 q 8 -10 16 0" stroke="#3b2a1a" strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d="M 114 132 q 8 -10 16 0" stroke="#3b2a1a" strokeWidth="4" strokeLinecap="round" fill="none" />
           </>
         ) : (
           <>
             <motion.ellipse
-              cx="78" cy="140" rx="5" ry="7" fill="#3b2a1a"
+              cx="78" cy="134" rx="5" ry="7" fill="#3b2a1a"
               animate={{ ry: [7, 1, 7] }}
               transition={{ duration: 4, repeat: Infinity, times: [0, 0.95, 1], ease: "easeInOut" }}
             />
             <motion.ellipse
-              cx="122" cy="140" rx="5" ry="7" fill="#3b2a1a"
+              cx="122" cy="134" rx="5" ry="7" fill="#3b2a1a"
               animate={{ ry: [7, 1, 7] }}
               transition={{ duration: 4, repeat: Infinity, times: [0, 0.95, 1], ease: "easeInOut" }}
             />
-            <circle cx="79.5" cy="138" r="1.6" fill="#fff" />
-            <circle cx="123.5" cy="138" r="1.6" fill="#fff" />
+            <circle cx="79.5" cy="132" r="1.6" fill="#fff" />
+            <circle cx="123.5" cy="132" r="1.6" fill="#fff" />
           </>
         )}
 
         {/* Smile */}
         <path
-          d="M 80 168 Q 100 185 120 168"
+          d="M 82 162 Q 100 180 118 162"
           stroke="#3b2a1a"
           strokeWidth="3.5"
           strokeLinecap="round"
