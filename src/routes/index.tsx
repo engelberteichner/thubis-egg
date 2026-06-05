@@ -411,15 +411,15 @@ function EggApp() {
           </h2>
           <div className="flex flex-wrap gap-2">
             {presets.map((p) => (
-              <PresetChip
-                key={p.id}
-                preset={p}
-                pressureHpa={loc.pressureHpa}
-                onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
-                onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds)}
-                onDelete={() => deletePreset(p.id)}
-                onRename={(name) => renamePreset(p.id, name)}
-              />
+            <PresetChip
+              key={p.id}
+              preset={p}
+              pressureHpa={loc.pressureHpa}
+              onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
+              onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds, p.id)}
+              onDelete={() => deletePreset(p.id)}
+              onRename={(name) => renamePreset(p.id, name)}
+            />
             ))}
             {presets.length === 0 && (
               <p className="text-sm text-muted-foreground px-1">No presets yet — tap the bookmark to save one.</p>
