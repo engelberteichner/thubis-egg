@@ -160,12 +160,12 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
-  function startTimer(d = doneness, s = size, fixedSeconds?: number) {
+  function startTimer(d = doneness, s = size, fixedSeconds?: number, presetId?: string) {
     primeAudio();
     const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
-      { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false },
+      { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false, presetId },
       ...prev,
     ]);
   }
