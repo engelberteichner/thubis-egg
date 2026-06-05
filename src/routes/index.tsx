@@ -415,8 +415,9 @@ function EggApp() {
                 preset={p}
                 pressureHpa={loc.pressureHpa}
                 onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
-                onStart={() => startTimer(p.doneness, p.size)}
+                onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds)}
                 onDelete={() => deletePreset(p.id)}
+                onRename={(name) => renamePreset(p.id, name)}
               />
             ))}
             {presets.length === 0 && (
