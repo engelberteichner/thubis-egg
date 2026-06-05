@@ -57,6 +57,7 @@ interface Timer {
   pausedRemaining: number | null; // null = running
   done: boolean;
   dismissedFinish?: boolean;
+  presetId?: string;
 }
 
 interface Preset {
@@ -159,12 +160,12 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
-  function startTimer(d = doneness, s = size, fixedSeconds?: number) {
+  function startTimer(d = doneness, s = size, fixedSeconds?: number, presetId?: string) {
     primeAudio();
     const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
-      { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false },
+      { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false, presetId },
       ...prev,
     ]);
   }
@@ -338,6 +339,7 @@ function EggApp() {
               variant={donenessVariant(doneness)}
               size={size}
               pxSize={170}
+              ribbon={doneness === 0.35 && size === "M"}
             />
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-4xl font-bold font-[var(--font-display)] tabular-nums">
@@ -410,15 +412,15 @@ function EggApp() {
           </h2>
           <div className="flex flex-wrap gap-2">
             {presets.map((p) => (
-              <PresetChip
-                key={p.id}
-                preset={p}
-                pressureHpa={loc.pressureHpa}
-                onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
-                onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds)}
-                onDelete={() => deletePreset(p.id)}
-                onRename={(name) => renamePreset(p.id, name)}
-              />
+            <PresetChip
+              key={p.id}
+              preset={p}
+              pressureHpa={loc.pressureHpa}
+              onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
+              onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds, p.id)}
+              onDelete={() => deletePreset(p.id)}
+              onRename={(name) => renamePreset(p.id, name)}
+            />
             ))}
             {presets.length === 0 && (
               <p className="text-sm text-muted-foreground px-1">No presets yet — tap the bookmark to save one.</p>
@@ -486,6 +488,7 @@ function TimerCard({
           cooking={!timer.done && timer.pausedRemaining == null}
           done={timer.done}
           pxSize={68}
+          ribbon={timer.presetId === THUBIS_ID}
         />
       </div>
 

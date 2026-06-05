@@ -21,6 +21,7 @@ interface Props {
   cooking?: boolean;
   done?: boolean;
   pxSize?: number;
+  ribbon?: boolean;
 }
 
 export function EggCharacter({
@@ -29,6 +30,7 @@ export function EggCharacter({
   cooking = false,
   done = false,
   pxSize = 180,
+  ribbon = false,
 }: Props) {
   const belly = BELLY[variant];
   const scale = SIZE_SCALE[size];
@@ -101,6 +103,22 @@ export function EggCharacter({
           stroke={SHELL.shade}
           strokeWidth="2"
         />
+
+        {/* Pink ribbon on head */}
+        {ribbon && (
+          <g>
+            {/* Ribbon tails */}
+            <path d="M 92 28 Q 88 38 90 46" stroke="#f9a8d4" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+            <path d="M 108 28 Q 112 38 110 46" stroke="#f9a8d4" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+            {/* Left loop */}
+            <ellipse cx="88" cy="24" rx="10" ry="7" fill="#f472b6" transform="rotate(-25 88 24)" />
+            {/* Right loop */}
+            <ellipse cx="112" cy="24" rx="10" ry="7" fill="#f472b6" transform="rotate(25 112 24)" />
+            {/* Center knot */}
+            <circle cx="100" cy="26" r="5.5" fill="#ec4899" />
+            <circle cx="100" cy="26" r="3" fill="#f9a8d4" />
+          </g>
+        )}
 
         {/* Yolk belly — color animates with variant */}
         <g clipPath="url(#clip-egg)">
