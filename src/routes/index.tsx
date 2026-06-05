@@ -57,6 +57,7 @@ interface Timer {
   pausedRemaining: number | null; // null = running
   done: boolean;
   dismissedFinish?: boolean;
+  presetId?: string;
 }
 
 interface Preset {
