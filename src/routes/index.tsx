@@ -524,24 +524,66 @@ function TimerCard({
 /* ---------------- Preset chip ---------------- */
 
 function PresetChip({
-  preset, pressureHpa, onLoad, onStart, onDelete,
+  preset, pressureHpa, onLoad, onStart, onDelete, onRename,
 }: {
   preset: Preset;
   pressureHpa: number;
   onLoad: () => void;
   onStart: () => void;
   onDelete: () => void;
+  onRename: (name: string) => void;
 }) {
-  const secs = calcCookSeconds(preset.doneness, preset.size, pressureHpa);
+  const secs = preset.fixedSeconds ?? calcCookSeconds(preset.doneness, preset.size, pressureHpa);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(preset.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      setDraft(preset.name);
+      requestAnimationFrame(() => inputRef.current?.select());
+    }
+  }, [editing, preset.name]);
+
+  function commit() {
+    onRename(draft);
+    setEditing(false);
+  }
+
   return (
     <div className="group relative flex items-stretch rounded-2xl bg-card border border-border overflow-hidden shadow-sm">
-      <button
-        onClick={onLoad}
-        className="px-3 py-2 text-left hover:bg-muted/60"
-      >
-        <p className="text-sm font-bold leading-tight">{preset.name}</p>
-        <p className="text-xs text-muted-foreground tabular-nums">{formatMMSS(secs)}</p>
-      </button>
+      {editing ? (
+        <div className="px-2 py-1.5 flex items-center">
+          <Input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commit();
+              if (e.key === "Escape") setEditing(false);
+            }}
+            className="h-7 text-sm font-bold w-32 px-2"
+          />
+        </div>
+      ) : (
+        <>
+          <button
+            onClick={onLoad}
+            className="px-3 py-2 text-left hover:bg-muted/60"
+          >
+            <p className="text-sm font-bold leading-tight">{preset.name}</p>
+            <p className="text-xs text-muted-foreground tabular-nums">{formatMMSS(secs)}</p>
+          </button>
+          <button
+            onClick={() => setEditing(true)}
+            className="px-2 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            title="Rename"
+          >
+            <Pencil className="size-3.5" />
+          </button>
+        </>
+      )}
       <button
         onClick={onStart}
         className="px-3 bg-primary/80 text-primary-foreground font-bold hover:bg-primary"
