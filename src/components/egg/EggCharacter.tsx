@@ -30,6 +30,7 @@ export function EggCharacter({
   cooking = false,
   done = false,
   pxSize = 180,
+  ribbon = false,
 }: Props) {
   const belly = BELLY[variant];
   const scale = SIZE_SCALE[size];
