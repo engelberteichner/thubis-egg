@@ -64,6 +64,8 @@ interface Preset {
   name: string;
   doneness: number;
   size: Size;
+  /** Optional override — if set, uses this exact time and ignores pressure adjustment. */
+  fixedSeconds?: number;
 }
 
 interface HistoryEntry {
@@ -86,6 +88,14 @@ function approxPressureFromAltitude(altM: number): number {
   return Math.round(1013.25 * Math.pow(1 - (0.0065 * altM) / 288.15, 5.255));
 }
 
+const THUBIS_ID = "p-thubis";
+const DEFAULT_PRESETS: Preset[] = [
+  { id: THUBIS_ID,  name: "Thubis egg",    doneness: 0.35, size: "M", fixedSeconds: 300 },
+  { id: "p-soft",   name: "Classic soft",  doneness: 0.15, size: "M" },
+  { id: "p-med",    name: "Jammy medium",  doneness: 0.5,  size: "M" },
+  { id: "p-hard",   name: "Lunchbox hard", doneness: 0.95, size: "L" },
+];
+
 function EggApp() {
   // ---------- composer state ----------
   const [doneness, setDoneness] = useState(0.5);
@@ -93,11 +103,7 @@ function EggApp() {
 
   // ---------- persisted state ----------
   const [timers, setTimers] = useLocalStorage<Timer[]>("egg:timers", []);
-  const [presets, setPresets] = useLocalStorage<Preset[]>("egg:presets", [
-    { id: "p-soft", name: "Classic soft", doneness: 0.15, size: "M" },
-    { id: "p-med",  name: "Jammy medium", doneness: 0.5,  size: "M" },
-    { id: "p-hard", name: "Lunchbox hard", doneness: 0.95, size: "L" },
-  ]);
+  const [presets, setPresets] = useLocalStorage<Preset[]>("egg:presets", DEFAULT_PRESETS);
   const [history, setHistory] = useLocalStorage<HistoryEntry[]>("egg:history", []);
   const [loc, setLoc] = useLocalStorage<LocInfo>("egg:loc", {
     pressureHpa: 1013,
@@ -105,6 +111,16 @@ function EggApp() {
     label: "Sea level",
     source: "default",
   });
+
+  // One-time migration: make sure the "Thubis egg" preset is present.
+  useEffect(() => {
+    setPresets((prev) =>
+      prev.some((p) => p.id === THUBIS_ID)
+        ? prev
+        : [{ id: THUBIS_ID, name: "Thubis egg", doneness: 0.35, size: "M", fixedSeconds: 300 }, ...prev],
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---------- ticking ----------
   const [now, setNow] = useState(() => Date.now());
