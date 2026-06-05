@@ -1,21 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   MapPin, Plus, Play, Pause, RotateCcw, X, Clock, Bookmark, Trash2, Check,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger,
 } from "@/components/ui/drawer";
 import { EggCharacter } from "@/components/egg/EggCharacter";
 import { useLocalStorage } from "@/lib/use-local-storage";
-import { playChime } from "@/lib/chime";
+import { playChime, primeAudio } from "@/lib/chime";
 import {
   calcCookSeconds, donenessLabel, donenessVariant, formatMMSS, type Size,
 } from "@/lib/egg-timer";
+
+const Pencil = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+    strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,6 +64,8 @@ interface Preset {
   name: string;
   doneness: number;
   size: Size;
+  /** Optional override — if set, uses this exact time and ignores pressure adjustment. */
+  fixedSeconds?: number;
 }
 
 interface HistoryEntry {
@@ -77,6 +88,14 @@ function approxPressureFromAltitude(altM: number): number {
   return Math.round(1013.25 * Math.pow(1 - (0.0065 * altM) / 288.15, 5.255));
 }
 
+const THUBIS_ID = "p-thubis";
+const DEFAULT_PRESETS: Preset[] = [
+  { id: THUBIS_ID,  name: "Thubis egg",    doneness: 0.35, size: "M", fixedSeconds: 300 },
+  { id: "p-soft",   name: "Classic soft",  doneness: 0.15, size: "M" },
+  { id: "p-med",    name: "Jammy medium",  doneness: 0.5,  size: "M" },
+  { id: "p-hard",   name: "Lunchbox hard", doneness: 0.95, size: "L" },
+];
+
 function EggApp() {
   // ---------- composer state ----------
   const [doneness, setDoneness] = useState(0.5);
@@ -84,11 +103,7 @@ function EggApp() {
 
   // ---------- persisted state ----------
   const [timers, setTimers] = useLocalStorage<Timer[]>("egg:timers", []);
-  const [presets, setPresets] = useLocalStorage<Preset[]>("egg:presets", [
-    { id: "p-soft", name: "Classic soft", doneness: 0.15, size: "M" },
-    { id: "p-med",  name: "Jammy medium", doneness: 0.5,  size: "M" },
-    { id: "p-hard", name: "Lunchbox hard", doneness: 0.95, size: "L" },
-  ]);
+  const [presets, setPresets] = useLocalStorage<Preset[]>("egg:presets", DEFAULT_PRESETS);
   const [history, setHistory] = useLocalStorage<HistoryEntry[]>("egg:history", []);
   const [loc, setLoc] = useLocalStorage<LocInfo>("egg:loc", {
     pressureHpa: 1013,
@@ -96,6 +111,16 @@ function EggApp() {
     label: "Sea level",
     source: "default",
   });
+
+  // One-time migration: make sure the "Thubis egg" preset is present.
+  useEffect(() => {
+    setPresets((prev) =>
+      prev.some((p) => p.id === THUBIS_ID)
+        ? prev
+        : [{ id: THUBIS_ID, name: "Thubis egg", doneness: 0.35, size: "M", fixedSeconds: 300 }, ...prev],
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---------- ticking ----------
   const [now, setNow] = useState(() => Date.now());
@@ -134,8 +159,9 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
-  function startTimer(d = doneness, s = size) {
-    const total = calcCookSeconds(d, s, loc.pressureHpa);
+  function startTimer(d = doneness, s = size, fixedSeconds?: number) {
+    primeAudio();
+    const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
       { id, doneness: d, size: s, totalSeconds: total, endsAt: Date.now() + total * 1000, pausedRemaining: null, done: false },
@@ -187,6 +213,12 @@ function EggApp() {
 
   function deletePreset(id: string) {
     setPresets((p) => p.filter((x) => x.id !== id));
+  }
+
+  function renamePreset(id: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setPresets((p) => p.map((x) => (x.id === id ? { ...x, name: trimmed } : x)));
   }
 
   // ---------- location ----------
@@ -383,8 +415,9 @@ function EggApp() {
                 preset={p}
                 pressureHpa={loc.pressureHpa}
                 onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
-                onStart={() => startTimer(p.doneness, p.size)}
+                onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds)}
                 onDelete={() => deletePreset(p.id)}
+                onRename={(name) => renamePreset(p.id, name)}
               />
             ))}
             {presets.length === 0 && (
@@ -491,24 +524,66 @@ function TimerCard({
 /* ---------------- Preset chip ---------------- */
 
 function PresetChip({
-  preset, pressureHpa, onLoad, onStart, onDelete,
+  preset, pressureHpa, onLoad, onStart, onDelete, onRename,
 }: {
   preset: Preset;
   pressureHpa: number;
   onLoad: () => void;
   onStart: () => void;
   onDelete: () => void;
+  onRename: (name: string) => void;
 }) {
-  const secs = calcCookSeconds(preset.doneness, preset.size, pressureHpa);
+  const secs = preset.fixedSeconds ?? calcCookSeconds(preset.doneness, preset.size, pressureHpa);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(preset.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      setDraft(preset.name);
+      requestAnimationFrame(() => inputRef.current?.select());
+    }
+  }, [editing, preset.name]);
+
+  function commit() {
+    onRename(draft);
+    setEditing(false);
+  }
+
   return (
     <div className="group relative flex items-stretch rounded-2xl bg-card border border-border overflow-hidden shadow-sm">
-      <button
-        onClick={onLoad}
-        className="px-3 py-2 text-left hover:bg-muted/60"
-      >
-        <p className="text-sm font-bold leading-tight">{preset.name}</p>
-        <p className="text-xs text-muted-foreground tabular-nums">{formatMMSS(secs)}</p>
-      </button>
+      {editing ? (
+        <div className="px-2 py-1.5 flex items-center">
+          <Input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commit();
+              if (e.key === "Escape") setEditing(false);
+            }}
+            className="h-7 text-sm font-bold w-32 px-2"
+          />
+        </div>
+      ) : (
+        <>
+          <button
+            onClick={onLoad}
+            className="px-3 py-2 text-left hover:bg-muted/60"
+          >
+            <p className="text-sm font-bold leading-tight">{preset.name}</p>
+            <p className="text-xs text-muted-foreground tabular-nums">{formatMMSS(secs)}</p>
+          </button>
+          <button
+            onClick={() => setEditing(true)}
+            className="px-2 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            title="Rename"
+          >
+            <Pencil className="size-3.5" />
+          </button>
+        </>
+      )}
       <button
         onClick={onStart}
         className="px-3 bg-primary/80 text-primary-foreground font-bold hover:bg-primary"
