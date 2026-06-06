@@ -603,13 +603,15 @@ function PresetChip({
       >
         <Play className="size-4" />
       </button>
-      <button
-        onClick={onDelete}
-        className="px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-        title="Delete preset"
-      >
-        <Trash2 className="size-3.5" />
-      </button>
+      {!isProtected && (
+        <button
+          onClick={onDelete}
+          className="px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          title="Delete preset"
+        >
+          <Trash2 className="size-3.5" />
+        </button>
+      )}
     </div>
   );
 }
