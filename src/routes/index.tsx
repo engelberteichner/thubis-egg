@@ -37,7 +37,11 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "icon", href: "/icon-192.png", type: "image/png" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "apple-touch-icon", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "apple-touch-icon", sizes: "512x512", href: "/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" },
