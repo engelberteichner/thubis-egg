@@ -535,10 +535,11 @@ function TimerCard({
 /* ---------------- Preset chip ---------------- */
 
 function PresetChip({
-  preset, pressureHpa, onLoad, onStart, onDelete, onRename,
+  preset, pressureHpa, isProtected, onLoad, onStart, onDelete, onRename,
 }: {
   preset: Preset;
   pressureHpa: number;
+  isProtected?: boolean;
   onLoad: () => void;
   onStart: () => void;
   onDelete: () => void;
