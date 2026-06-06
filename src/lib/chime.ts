@@ -1,6 +1,10 @@
 let ctx: AudioContext | null = null;
 let audioEl: HTMLAudioElement | null = null;
 let audioUrl: string | null = null;
+let silentEl: HTMLAudioElement | null = null;
+let silentUrl: string | null = null;
+type WakeLockSentinelLike = { release: () => Promise<void> };
+let wakeLock: WakeLockSentinelLike | null = null;
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
