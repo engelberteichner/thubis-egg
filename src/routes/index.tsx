@@ -165,8 +165,17 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
+  // Keep the tab/audio alive while any timer is running (needed so iOS
+  // chimes when the phone is locked).
+  useEffect(() => {
+    const anyRunning = timers.some((t) => !t.done && t.pausedRemaining == null);
+    if (anyRunning) startKeepAwake();
+    else stopKeepAwake();
+  }, [timers]);
+
   function startTimer(d = doneness, s = size, fixedSeconds?: number, presetId?: string) {
     primeAudio();
+    void startKeepAwake();
     const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
