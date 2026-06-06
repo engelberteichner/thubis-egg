@@ -104,19 +104,32 @@ export function EggCharacter({
           strokeWidth="2"
         />
 
-        {/* Pink ribbon on head */}
+        {/* Pink ribbon (🎀) — tilted on the upper-left side of the head */}
         {ribbon && (
-          <g>
-            {/* Ribbon tails */}
-            <path d="M 92 28 Q 88 38 90 46" stroke="#f9a8d4" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-            <path d="M 108 28 Q 112 38 110 46" stroke="#f9a8d4" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+          <g transform="translate(58 52) rotate(-22)">
+            {/* Tails / streamers */}
+            <path d="M -3 6 Q -10 16 -14 26 L -6 26 Q -1 16 3 8 Z" fill="#ec4899" />
+            <path d="M 3 6 Q 10 16 14 26 L 6 26 Q 1 16 -3 8 Z" fill="#ec4899" />
             {/* Left loop */}
-            <ellipse cx="88" cy="24" rx="10" ry="7" fill="#f472b6" transform="rotate(-25 88 24)" />
+            <path
+              d="M 0 0 C -14 -10 -22 -6 -22 2 C -22 10 -12 12 0 6 Z"
+              fill="#f472b6"
+              stroke="#ec4899"
+              strokeWidth="1.2"
+            />
             {/* Right loop */}
-            <ellipse cx="112" cy="24" rx="10" ry="7" fill="#f472b6" transform="rotate(25 112 24)" />
+            <path
+              d="M 0 0 C 14 -10 22 -6 22 2 C 22 10 12 12 0 6 Z"
+              fill="#f472b6"
+              stroke="#ec4899"
+              strokeWidth="1.2"
+            />
+            {/* Loop highlights */}
+            <ellipse cx="-12" cy="-2" rx="4" ry="1.4" fill="#fbcfe8" opacity="0.9" />
+            <ellipse cx="12" cy="-2" rx="4" ry="1.4" fill="#fbcfe8" opacity="0.9" />
             {/* Center knot */}
-            <circle cx="100" cy="26" r="5.5" fill="#ec4899" />
-            <circle cx="100" cy="26" r="3" fill="#f9a8d4" />
+            <ellipse cx="0" cy="3" rx="4.5" ry="6" fill="#ec4899" />
+            <ellipse cx="0" cy="2" rx="2" ry="3.5" fill="#f9a8d4" />
           </g>
         )}
 
