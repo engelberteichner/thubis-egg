@@ -346,7 +346,7 @@ function EggApp() {
               variant={donenessVariant(doneness)}
               size={size}
               pxSize={170}
-              ribbon={doneness === 0.35 && size === "M"}
+              ribbon={selectedPresetId === THUBIS_ID}
             />
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-4xl font-bold font-[var(--font-display)] tabular-nums">
