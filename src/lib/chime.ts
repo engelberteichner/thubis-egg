@@ -196,8 +196,7 @@ export async function startKeepAwake() {
     // Hint that this is background-friendly playback
     silentEl.setAttribute("playsinline", "");
     try {
-      // @ts-expect-error – non-standard but helps some browsers
-      silentEl.disableRemotePlayback = true;
+      (silentEl as HTMLAudioElement & { disableRemotePlayback?: boolean }).disableRemotePlayback = true;
     } catch {/* ignore */}
   }
   try {
