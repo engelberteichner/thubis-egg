@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/drawer";
 import { EggCharacter } from "@/components/egg/EggCharacter";
 import { useLocalStorage } from "@/lib/use-local-storage";
-import { playChime, primeAudio } from "@/lib/chime";
+import { playChime, primeAudio, startKeepAwake, stopKeepAwake } from "@/lib/chime";
 import {
   calcCookSeconds, donenessLabel, donenessVariant, formatMMSS, type Size,
 } from "@/lib/egg-timer";
@@ -165,8 +165,17 @@ function EggApp() {
     [doneness, size, loc.pressureHpa],
   );
 
+  // Keep the tab/audio alive while any timer is running (needed so iOS
+  // chimes when the phone is locked).
+  useEffect(() => {
+    const anyRunning = timers.some((t) => !t.done && t.pausedRemaining == null);
+    if (anyRunning) startKeepAwake();
+    else stopKeepAwake();
+  }, [timers]);
+
   function startTimer(d = doneness, s = size, fixedSeconds?: number, presetId?: string) {
     primeAudio();
+    void startKeepAwake();
     const total = fixedSeconds ?? calcCookSeconds(d, s, loc.pressureHpa);
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setTimers((prev) => [
