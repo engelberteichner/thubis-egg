@@ -423,8 +423,9 @@ function EggApp() {
               key={p.id}
               preset={p}
               pressureHpa={loc.pressureHpa}
-              onLoad={() => { setDoneness(p.doneness); setSize(p.size); }}
-              onStart={() => startTimer(p.doneness, p.size, p.fixedSeconds, p.id)}
+              isProtected={p.id === THUBIS_ID}
+              onLoad={() => { setDoneness(p.doneness); setSize(p.size); setSelectedPresetId(p.id); }}
+              onStart={() => { setSelectedPresetId(p.id); startTimer(p.doneness, p.size, p.fixedSeconds, p.id); }}
               onDelete={() => deletePreset(p.id)}
               onRename={(name) => renamePreset(p.id, name)}
             />
