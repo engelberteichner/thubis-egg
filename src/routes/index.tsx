@@ -105,6 +105,7 @@ function EggApp() {
   // ---------- composer state ----------
   const [doneness, setDoneness] = useState(0.5);
   const [size, setSize] = useState<Size>("M");
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
   // ---------- persisted state ----------
   const [timers, setTimers] = useLocalStorage<Timer[]>("egg:timers", []);
