@@ -218,7 +218,9 @@ function EggApp() {
   }
 
   function deletePreset(id: string) {
+    if (id === THUBIS_ID) return; // protected default
     setPresets((p) => p.filter((x) => x.id !== id));
+    if (selectedPresetId === id) setSelectedPresetId(null);
   }
 
   function renamePreset(id: string, name: string) {
