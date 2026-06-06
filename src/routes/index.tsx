@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/drawer";
 import { EggCharacter } from "@/components/egg/EggCharacter";
 import { useLocalStorage } from "@/lib/use-local-storage";
-import { playChime, primeAudio } from "@/lib/chime";
+import { playChime, primeAudio, startKeepAwake, stopKeepAwake } from "@/lib/chime";
 import {
   calcCookSeconds, donenessLabel, donenessVariant, formatMMSS, type Size,
 } from "@/lib/egg-timer";
