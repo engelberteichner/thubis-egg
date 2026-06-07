@@ -28,10 +28,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          # Removed "cache: npm" to prevent lockfile missing crashes completely
 
       - name: Install dependencies
-        run: npm install # Dynamically handles missing package-lock.json
+        run: npm install
 
       - name: Build
         run: npm run build
@@ -39,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public # Nitro's standard static directory path
+          path: ./.output/public
 
       - name: Deploy to GitHub Pages
         id: deployment
