@@ -35,14 +35,49 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Create 404 Fallback
-        # Kopiert die index.html zu 404.html, damit Direktaufrufe von Unterseiten funktionieren
-        run: cp ./dist/index.html ./dist/404.html
+      - name: Prepare Static Files for GitHub Pages
+        # TanStack Start legt im SPA-Modus die Dateien in .output/public ab.
+        # Die Haupt-Einstiegsdatei heißt dort oft _shell.html statt index.html.
+        run: |
+          TARGET_DIR=""
+          
+          if [ -d "./.output/public" ]; then
+            TARGET_DIR="./.output/public"
+          elif [ -d "./dist" ]; then
+            TARGET_DIR="./dist"
+          else
+            echo "Error: Neither .output/public nor dist directory was found!"
+            exit 1
+          fi
+          
+          echo "Found build output directory at: $TARGET_DIR"
+          
+          # Sicherstellen, dass index.html existiert (aus _shell.html falls nötig)
+          if [ -f "$TARGET_DIR/_shell.html" ] && [ ! -f "$TARGET_DIR/index.html" ]; then
+            cp "$TARGET_DIR/_shell.html" "$TARGET_DIR/index.html"
+            echo "Copied _shell.html to index.html"
+          fi
+          
+          # 404.html Fallback für das Client-Routing auf GitHub Pages erstellen
+          if [ -f "$TARGET_DIR/index.html" ]; then
+            cp "$TARGET_DIR/index.html" "$TARGET_DIR/404.html"
+            echo "Successfully created 404.html fallback"
+          elif [ -f "$TARGET_DIR/_shell.html" ]; then
+            cp "$TARGET_DIR/_shell.html" "$TARGET_DIR/404.html"
+            echo "Successfully created 404.html fallback from _shell.html"
+          else
+            echo "Error: No base HTML file found to create fallback!"
+            ls -la $TARGET_DIR
+            exit 1
+          fi
+          
+          # Den ermittelten Pfad für den nächsten Step speichern
+          echo "DEPLOY_PATH=$TARGET_DIR" >> $GITHUB_ENV
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ${{ env.DEPLOY_PATH }}
 
       - name: Deploy to GitHub Pages
         id: deployment
