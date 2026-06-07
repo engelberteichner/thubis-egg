@@ -85,7 +85,21 @@ interface LocInfo {
   pressureHpa: number;
   altitudeM: number | null;
   label: string;        // e.g. "Sea level" or "320 m altitude"
+  city?: string | null;
   source: "default" | "gps" | "manual";
+}
+
+async function fetchCity(lat: number, lon: number): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.city || data.locality || data.principalSubdivision || null;
+  } catch {
+    return null;
+  }
 }
 
 function approxPressureFromAltitude(altM: number): number {
@@ -244,22 +258,24 @@ function EggApp() {
     if (!("geolocation" in navigator)) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const alt = pos.coords.altitude;
+        const city = await fetchCity(pos.coords.latitude, pos.coords.longitude);
         if (alt != null && !Number.isNaN(alt)) {
           const pressure = approxPressureFromAltitude(alt);
           setLoc({
             pressureHpa: pressure,
             altitudeM: Math.round(alt),
             label: `${Math.round(alt)} m altitude`,
+            city,
             source: "gps",
           });
         } else {
-          // GPS returned no altitude; assume sea level but mark as GPS-confirmed location
           setLoc({
             pressureHpa: 1013,
             altitudeM: 0,
-            label: "Location set · sea level",
+            label: "Sea level",
+            city,
             source: "gps",
           });
         }
@@ -607,7 +623,7 @@ function PresetChip({
       )}
       <button
         onClick={onStart}
-        className="px-3 bg-primary/80 text-primary-foreground font-bold hover:bg-primary"
+        className="px-6 bg-primary/80 text-primary-foreground font-bold hover:bg-primary flex items-center justify-center"
         title="Start now"
       >
         <Play className="size-4" />
@@ -643,7 +659,9 @@ function LocationChip({
       <DrawerTrigger asChild>
         <button className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mt-0.5">
           <MapPin className="size-3.5" />
-          <span>{loc.label} · {loc.pressureHpa} hPa</span>
+          <span>
+            {loc.city ? `${loc.city} · ` : ""}{loc.label} · {loc.pressureHpa} hPa
+          </span>
         </button>
       </DrawerTrigger>
       <DrawerContent className="bg-card">
