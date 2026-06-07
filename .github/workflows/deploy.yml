@@ -27,8 +27,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          # Removed "cache: npm" to prevent lockfile missing crashes completely
+          node-version: 24 # 👈 Upgraded from 20 to use the latest secure runner version
 
       - name: Install dependencies
         run: npm install
@@ -36,13 +35,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Generate index.html for static hosting
-        run: node scripts/generate-index-html.mjs
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist/client
+          path: ./.output/public
 
       - name: Deploy to GitHub Pages
         id: deployment
