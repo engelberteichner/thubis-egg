@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { tsConfigPaths } from "vite-tsconfig-paths";
-import { tailwindcss } from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react"; // 👈 Korrigiert: Default-Import ohne geschweifte Klammern
+import tailwindcss from "@tailwindcss/vite"; // 👈 Korrigiert: Default-Import für Tailwind v4
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   // Definiert den korrekten GitHub Pages Unterordner-Pfad
