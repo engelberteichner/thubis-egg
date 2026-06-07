@@ -16,6 +16,7 @@ export default defineConfig({
   // Use the github-pages preset for static site generation (disables Cloudflare worker target).
   nitro: {
     preset: 'github-pages',
+    // @ts-expect-error Lovable config types don't include prerender, but runtime passes it through.
     prerender: {
       crawlLinks: true
     }
