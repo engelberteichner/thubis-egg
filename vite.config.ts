@@ -1,15 +1,25 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, nitro (build-only using cloudflare as a default target),
-//     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
-//     error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig } from "vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { tsConfigPaths } from "vite-tsconfig-paths";
+import { tailwindcss } from "@tailwindcss/vite";
+import { react } from "@vitejs/plugin-react";
 
 export default defineConfig({
-  tanstackStart: {
-    // Teilt dem Router mit, dass er in einer SPA-Umgebung unter dem GitHub-Subordner läuft
-    base: '/thubis-egg/',
-    server: { entry: "server" }
+  // Definiert den korrekten GitHub Pages Unterordner-Pfad
+  base: '/thubis-egg/',
+  plugins: [
+    // Aktiviert den Single-Page-Application Modus für TanStack
+    tanstackStart({
+      spa: {
+        enabled: true,
+      }
+    }),
+    react(),
+    tailwindcss(),
+    tsConfigPaths()
+  ],
+  // Zwingt den Bundler, die statischen Dateien im Standardordner 'dist' abzulegen
+  build: {
+    outDir: 'dist'
   }
 });
