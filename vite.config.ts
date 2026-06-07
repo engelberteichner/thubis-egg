@@ -13,9 +13,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Use the github-pages preset for static site generation (disables Cloudflare worker target).
+  // Use the node-server preset so nitro runs in CI, and enable prerendering for static HTML.
   nitro: {
-    preset: 'github-pages',
+    preset: 'node-server',
     // @ts-expect-error Lovable config types don't include prerender, but runtime passes it through.
     prerender: {
       crawlLinks: true
