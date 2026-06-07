@@ -35,10 +35,23 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Create GitHub Pages 404 Redirect
-        # Im SPA-Modus wird die index.html in .output/public generiert.
-        # Wir kopieren sie als 404.html, damit auch Direktaufrufe von Unterseiten klappen.
-        run: cp ./.output/public/index.html ./.output/public/404.html
+      - name: Prepare Static Files for GitHub Pages
+        # Dieser Schritt stellt sicher, dass sowohl index.html als auch 404.html existieren, 
+        # egal ob das Framework _shell.html oder index.html generiert hat.
+        run: |
+          PUBLIC_DIR="./.output/public"
+          if [ -f "$PUBLIC_DIR/_shell.html" ]; then
+            cp "$PUBLIC_DIR/_shell.html" "$PUBLIC_DIR/index.html"
+            cp "$PUBLIC_DIR/_shell.html" "$PUBLIC_DIR/404.html"
+            echo "Successfully generated fallback from _shell.html"
+          elif [ -f "$PUBLIC_DIR/index.html" ]; then
+            cp "$PUBLIC_DIR/index.html" "$PUBLIC_DIR/404.html"
+            echo "Successfully generated fallback from index.html"
+          else
+            echo "Error: No entry HTML file generated in $PUBLIC_DIR!"
+            ls -la $PUBLIC_DIR
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
