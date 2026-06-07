@@ -36,7 +36,7 @@ jobs:
         run: npm run build
 
       - name: Prepare Static Files for GitHub Pages
-        # Wir wissen jetzt, dass die statischen Dateien in ./dist/client liegen.
+        # Dieser Schritt sucht den Build-Ordner, verlinkt dein Apple-Icon korrekt und erstellt das 404-Fallback
         run: |
           if [ -d "./dist/client" ]; then
             TARGET_DIR="./dist/client"
@@ -49,19 +49,22 @@ jobs:
           
           echo "Target deployment directory set to: $TARGET_DIR"
           
-          # Prüfen, ob die Einstiegsdatei _shell.html oder index.html heißt und Fallback sichern
-          if [ -f "$TARGET_DIR/_shell.html" ]; then
+          # 1. Sicherstellen, dass die index.html existiert
+          if [ -f "$TARGET_DIR/_shell.html" ] && [ ! -f "$TARGET_DIR/index.html" ]; then
             cp "$TARGET_DIR/_shell.html" "$TARGET_DIR/index.html"
-            cp "$TARGET_DIR/_shell.html" "$TARGET_DIR/404.html"
-            echo "Generated index.html and 404.html from _shell.html"
-          elif [ -f "$TARGET_DIR/index.html" ]; then
-            cp "$TARGET_DIR/index.html" "$TARGET_DIR/404.html"
-            echo "Generated 404.html from index.html"
-          else
-            echo "Error: Neither index.html nor _shell.html found in $TARGET_DIR!"
-            ls -la $TARGET_DIR
-            exit 1
           fi
+          
+          # 2. Apple Touch Icon Pfad hart in den HTML <head> injizieren
+          if [ -f "$TARGET_DIR/apple-touch-icon.png" ]; then
+            echo "Found apple-touch-icon.png. Injecting iOS shortcut headers..."
+            # Fügt die korrekten iOS-Metadaten und den Pfad direkt vor dem </head>-Tag ein
+            sed -i "s|</head>|<link rel=\"apple-touch-icon\" href=\"/thubis-egg/apple-touch-icon.png\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"></head>|g" "$TARGET_DIR/index.html"
+          else
+            echo "Warning: apple-touch-icon.png was not compiled into $TARGET_DIR!"
+          fi
+          
+          # 3. Das 404.html Fallback mit dem injizierten Icon klonen
+          cp "$TARGET_DIR/index.html" "$TARGET_DIR/404.html"
           
           echo "DEPLOY_PATH=$TARGET_DIR" >> $GITHUB_ENV
 
