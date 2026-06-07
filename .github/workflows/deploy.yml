@@ -33,7 +33,6 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        # Added --legacy-peer-deps to completely bypass the Nitro conflict
         run: npm install --legacy-peer-deps 
 
       - name: Build
@@ -42,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public
+          path: ./dist # 👈 Changed from ./.output/public back to ./dist
 
       - name: Deploy to GitHub Pages
         id: deployment
