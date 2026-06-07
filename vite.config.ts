@@ -18,7 +18,8 @@ export default defineConfig({
     preset: 'node-server',
     // @ts-expect-error Lovable config types don't include prerender, but runtime passes it through.
     prerender: {
-      crawlLinks: true
+      crawlLinks: true,
+      routes: ['/']
     }
   }
 });
