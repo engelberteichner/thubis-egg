@@ -5,38 +5,18 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import fs from "node:fs";
-import path from "node:path";
 
 export default defineConfig({
   tanstackStart: {
     base: '/thubis-egg/',
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Passing custom properties inside the underlying Vite configuration block
-  // bypasses Lovable's default Cloudflare server compiler environment cleanly.
   vite: {
     nitro: {
       preset: 'github-pages',
       prerender: {
         crawlLinks: true,
         routes: ['/']
-      },
-      hooks: {
-        // Runs immediately after Nitro finishes exporting your static build pages.
-        // It creates a duplicated index fallback file to eliminate routing errors.
-        'compiled': async (nitroContext) => {
-          const publicDir = path.join(nitroContext.options.output.publicDir);
-          const indexPath = path.join(publicDir, "index.html");
-          const fallbackPath = path.join(publicDir, "404.html");
-          
-          if (fs.existsSync(indexPath)) {
-            fs.copyFileSync(indexPath, fallbackPath);
-            console.log("Successfully generated SPA 404.html fallback routing!");
-          }
-        }
       }
     }
   }
