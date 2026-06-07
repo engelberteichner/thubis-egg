@@ -31,7 +31,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install # Dynamically handles missing package-lock.json
 
       - name: Build
         run: npm run build
@@ -39,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./.output/public # Nitro's standard static directory path
 
       - name: Deploy to GitHub Pages
         id: deployment
