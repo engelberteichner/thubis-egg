@@ -33,30 +33,31 @@ jobs:
         run: npm install --legacy-peer-deps 
 
       - name: Build
+        # Wir zwingen Nitro über env, den statischen Export zu starten
+        env:
+          NITRO_PRESET: github-pages
         run: npm run build
 
       - name: Prepare Static Files for GitHub Pages
-        # Dieser Schritt stellt sicher, dass sowohl index.html als auch 404.html existieren, 
-        # egal ob das Framework _shell.html oder index.html generiert hat.
+        # Im statischen Modus liegt alles in dist. Wir sichern uns mit der 404.html ab.
         run: |
-          PUBLIC_DIR="./.output/public"
-          if [ -f "$PUBLIC_DIR/_shell.html" ]; then
-            cp "$PUBLIC_DIR/_shell.html" "$PUBLIC_DIR/index.html"
-            cp "$PUBLIC_DIR/_shell.html" "$PUBLIC_DIR/404.html"
-            echo "Successfully generated fallback from _shell.html"
-          elif [ -f "$PUBLIC_DIR/index.html" ]; then
-            cp "$PUBLIC_DIR/index.html" "$PUBLIC_DIR/404.html"
-            echo "Successfully generated fallback from index.html"
+          if [ -f "./dist/index.html" ]; then
+            cp ./dist/index.html ./dist/404.html
+            echo "Successfully prepared dist folder"
+          elif [ -f "./.output/public/index.html" ]; then
+            cp ./.output/public/index.html ./.output/public/404.html
+            mkdir -p ./dist
+            cp -r ./.output/public/* ./dist/
+            echo "Successfully moved from .output to dist"
           else
-            echo "Error: No entry HTML file generated in $PUBLIC_DIR!"
-            ls -la $PUBLIC_DIR
+            echo "Error: index.html not found anywhere!"
             exit 1
           fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public
+          path: ./dist
 
       - name: Deploy to GitHub Pages
         id: deployment
