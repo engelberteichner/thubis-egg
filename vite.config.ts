@@ -8,20 +8,8 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
+    // Teilt dem Router mit, dass er in einer SPA-Umgebung unter dem GitHub-Subordner läuft
     base: '/thubis-egg/',
-    server: { entry: "server" },
-    // Schaltet den SPA-Modus korrekt ein
-    spa: {
-      enabled: true,
-    }
-  },
-  vite: {
-    nitro: {
-      preset: 'github-pages',
-      prerender: {
-        crawlLinks: true,
-        routes: ['/']
-      }
-    }
+    server: { entry: "server" }
   }
 });
