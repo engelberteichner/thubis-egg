@@ -3,6 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "homepage": "https://<your-github-username>.github.io/thubis-egg/",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
