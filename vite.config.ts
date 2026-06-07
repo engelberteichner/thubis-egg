@@ -8,10 +8,19 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    base: '/thubis-egg/', /
-    plugins: [react()],
+    base: '/thubis-egg/',
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Pass explicit instructions down to Nitro to override the default Cloudflare target 
+  // and force static generation for GitHub Pages.
+  vite: {
+    nitro: {
+      preset: 'github-pages',
+      prerender: {
+        crawlLinks: true
+      }
+    }
+  }
 });
