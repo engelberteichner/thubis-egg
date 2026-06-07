@@ -13,14 +13,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Pass explicit instructions down to Nitro to override the default Cloudflare target 
-  // and force static generation for GitHub Pages.
-  vite: {
-    nitro: {
-      preset: 'github-pages',
-      prerender: {
-        crawlLinks: true
-      }
+  // Use the github-pages preset for static site generation (disables Cloudflare worker target).
+  nitro: {
+    preset: 'github-pages',
+    prerender: {
+      crawlLinks: true
     }
   }
 });
