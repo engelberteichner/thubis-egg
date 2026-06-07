@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Thubis Egg Timer" },
+      { name: "description", content: "Egg Timer Pro is an iPhone app for cooking eggs with adjustable timers and visual feedback." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Thubis Egg Timer" },
+      { property: "og:description", content: "Egg Timer Pro is an iPhone app for cooking eggs with adjustable timers and visual feedback." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Thubis Egg Timer" },
+      { name: "twitter:description", content: "Egg Timer Pro is an iPhone app for cooking eggs with adjustable timers and visual feedback." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b0f48198-2ae7-44c4-a20a-6db44938c9ba/id-preview-f98976d1--bdb2e888-e509-4e5d-b678-6cd34da52ca0.lovable.app-1780820507772.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b0f48198-2ae7-44c4-a20a-6db44938c9ba/id-preview-f98976d1--bdb2e888-e509-4e5d-b678-6cd34da52ca0.lovable.app-1780820507772.png" },
     ],
     links: [
       {
