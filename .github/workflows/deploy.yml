@@ -36,10 +36,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Generate index.html for static hosting
+        run: node scripts/generate-index-html.mjs
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public
+          path: ./dist/client
 
       - name: Deploy to GitHub Pages
         id: deployment

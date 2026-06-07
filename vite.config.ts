@@ -13,14 +13,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Pass explicit instructions down to Nitro to override the default Cloudflare target 
-  // and force static generation for GitHub Pages.
-  vite: {
-    nitro: {
-      preset: 'github-pages',
-      prerender: {
-        crawlLinks: true
-      }
+  // Use the node-server preset so nitro runs in CI, and enable prerendering for static HTML.
+  nitro: {
+    preset: 'node-server',
+    // @ts-expect-error Lovable config types don't include prerender, but runtime passes it through.
+    prerender: {
+      crawlLinks: true,
+      routes: ['/']
     }
   }
 });
